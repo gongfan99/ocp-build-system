@@ -29,7 +29,6 @@ inputs:
     description: "tag for the ocp cache naming"
     required: true
 
-
 runs:
   using: "composite"
   steps:
@@ -39,7 +38,6 @@ runs:
     # Install dependencies
     # - - - - - - - - - - - - - - - - - - - - -
 
-    
     - name: (Ubuntu) Install dependencies
       if: runner.os == 'Linux'
       shell: bash -l {0}
@@ -49,7 +47,7 @@ runs:
         apt-get update -qq
         DEBIAN_FRONTEND=noninteractive apt-get install -qq -y \
           mesa-common-dev libegl1-mesa-dev libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev libxcursor-dev \
-          libfreeimage-dev libfreetype-dev libfontconfig-dev git patch clang build-essential \
+          libfreeimage-dev libfreetype6-dev libfontconfig1-dev git patch clang build-essential \
           ca-certificates curl unzip  > /dev/null 2>&1
 
     # - - -
@@ -64,7 +62,6 @@ runs:
     # Install Python (micromamba)
     # - - - - - - - - - - - - - - - - - - - - -
 
-    
     - name: Set up Python ${{ inputs.python-version }} via micromamba
       uses: mamba-org/setup-micromamba@v2
       with:
@@ -74,7 +71,6 @@ runs:
         # cache-environment: true
         # cache-environment-key: environment-${{ inputs.python-version }}-${{ inputs.os }}-${{ inputs.use-vtk }}
 
-    
     - name: Get number of CPUs
       shell: bash -l {0}
       id: cpu-count
@@ -86,7 +82,6 @@ runs:
         echo "cpu_count=$cpu_count" >> $GITHUB_OUTPUT
         echo "=> Using $cpu_count CPUs"
 
-    
     - name: (Mac, Windows) Install dependencies
       if: runner.os != 'Linux'
       shell: bash -l {0}
@@ -102,7 +97,6 @@ runs:
     # Restore SDKs
     # - - - - - - - - - - - - - - - - - - - - -
 
-    
     - name: Restore VTK SDK cache
       if: inputs.use-vtk == 'vtk'
       id: cache-vtk-restore
@@ -112,7 +106,6 @@ runs:
           ~/opt/local/vtk-${{ env.VTK }}
         key: VTK-${{ env.VTK }}-py-${{ inputs.python-version }}-${{ inputs.os }}-
 
-    
     - name: Restore OCCT SDK cache with VTK support
       id: cache-occt-restore
       uses: actions/cache/restore@v4
@@ -139,7 +132,6 @@ runs:
       with:
         path: ${{ github.workspace }}/OCP/build/${{ inputs.module }}
         key: OCP-${{ env.OCP }}-VTK-${{ inputs.use-vtk }}-py${{ inputs.python-version }}-${{ inputs.os }}-
-
 
     - name: Patch vtk out of OCP
       if: inputs.use-vtk == 'novtk' && steps.cache-ocp-restore.outputs.cache-hit != 'true'
@@ -171,7 +163,6 @@ runs:
           sed -i.bak '/register_IVtk/d' OCP/OCP.cpp
         done
 
-    
     - name: (Linux) Generate OCP build files and build OCP
       if: runner.os == 'Linux' && steps.cache-ocp-restore.outputs.cache-hit != 'true'
       shell: bash -l {0}
@@ -241,7 +232,7 @@ runs:
         else
           VTK_DIR=""
         fi
-        
+
         echo "Building OCP with VTK_DIR=$VTK_DIR"
 
         env ${{ inputs.env }} cmake -B build -S OCP -G Ninja \
@@ -309,7 +300,6 @@ runs:
 
         ninja -C build -j ${{ steps.cpu-count.outputs.cpu_count }}
 
-    
     - name: Cache OCP module
       id: cache-ocp-save
       uses: actions/cache/save@v4
@@ -327,7 +317,6 @@ runs:
     #               OCP wheel
     # ================================================================================
 
-    
     - name: Create the cadquery_ocp wheel
       shell: bash -l {0}
       run: |
@@ -411,7 +400,6 @@ runs:
 
         unzip -l dist/${PKG_NAME}*.whl
 
-    
     - name: (Linux) Delocate the cadquery_ocp wheel
       if: runner.os == 'Linux'
       shell: bash -l {0}
@@ -453,7 +441,6 @@ runs:
         python -m wheel pack ${PKG_NAME}-${{ env.WHEEL }}
         cd ..
 
-    
     - name: (Mac) Delocate the cadquery_ocp wheel
       if: runner.os == 'macOS'
       shell: bash -l {0}
@@ -489,7 +476,6 @@ runs:
             --wheel-dir=wheel \
             dist/*.whl
 
-    
     - name: (Windows) Delocate the cadquery_ocp wheel
       if: runner.os == 'Windows'
       shell: bash -l {0}
@@ -511,7 +497,6 @@ runs:
 
         PATH=~/opt/local/occt-${{ env.OCCT }}-${{ inputs.use-vtk }}/win64/vc14/bin/:$PATH delvewheel repair $EXCLUDE --wheel-dir wheel --namespace-pkg ${PKG_NAME} dist/*.whl
 
-    
     - name: Upload vtk cadquery_ocp wheel
       if: inputs.use-vtk == 'vtk'
       uses: actions/upload-artifact@v4
@@ -519,10 +504,9 @@ runs:
         name: cadquery-ocp-${{ env.WHEEL }}-${{ inputs.os }}-cp${{ inputs.python-version }}
         path: pypi/wheel/*.whl
 
-    
     - name: Upload novtk cadquery_ocp wheel
       if: inputs.use-vtk == 'novtk'
       uses: actions/upload-artifact@v4
       with:
         name: cadquery-ocp-novtk-${{ env.WHEEL }}-${{ inputs.os }}-cp${{ inputs.python-version }}
-        path: pypi/wheel/*.whl  
+        path: pypi/wheel/*.whl
