@@ -59,23 +59,18 @@ jobs:
       - name: Fix Ubuntu 18.10 apt sources
         shell: bash -l {0}
         run: |
-          # Backup original sources.list
-          cp /etc/apt/sources.list /etc/apt/sources.list.backup
-          
-          # Create new sources.list for Ubuntu 18.10 (Cosmic) archive
-          cat > /etc/apt/sources.list << 'EOF'
-          deb http://old-releases.ubuntu.com/ubuntu/ cosmic main restricted universe multiverse
-          deb http://old-releases.ubuntu.com/ubuntu/ cosmic-updates main restricted universe multiverse
-          deb http://old-releases.ubuntu.com/ubuntu/ cosmic-security main restricted universe multiverse
-          deb http://old-releases.ubuntu.com/ubuntu/ cosmic-backports main restricted universe multiverse
-          EOF
-          
-          # Also update sources.list.d if any files exist
-          if [ -d /etc/apt/sources.list.d ]; then
-            for file in /etc/apt/sources.list.d/*.list; do
-              [ -f "$file" ] && sed -i 's|http://archive.ubuntu.com/ubuntu|http://old-releases.ubuntu.com/ubuntu|g' "$file"
-            done
-          fi
+          sed -i 's|http://archive.ubuntu.com/ubuntu|http://old-releases.ubuntu.com/ubuntu|g' /etc/apt/sources.list
+          sed -i 's|http://security.ubuntu.com/ubuntu|http://old-releases.ubuntu.com/ubuntu|g' /etc/apt/sources.list
+
+      - name: Debug check package availability
+        shell: bash -l {0}
+        run: |
+          apt-get update -qq
+          echo "Checking package availability in Cosmic archive:"
+          for pkg in mesa-common-dev libegl1-mesa-dev libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev libxcursor-dev libfreeimage-dev libfreetype-dev libfontconfig-dev git patch clang build-essential ca-certificates; do
+            echo -n "$pkg: "
+            apt-cache policy $pkg | grep -E "Candidate:|http://old-releases" || echo "NOT FOUND"
+          done
 
       - name: Build SDKs
         id: build-sdks
@@ -115,23 +110,8 @@ jobs:
       - name: Fix Ubuntu 18.10 apt sources
         shell: bash -l {0}
         run: |
-          # Backup original sources.list
-          cp /etc/apt/sources.list /etc/apt/sources.list.backup
-          
-          # Create new sources.list for Ubuntu 18.10 (Cosmic) archive
-          cat > /etc/apt/sources.list << 'EOF'
-          deb http://old-releases.ubuntu.com/ubuntu/ cosmic main restricted universe multiverse
-          deb http://old-releases.ubuntu.com/ubuntu/ cosmic-updates main restricted universe multiverse
-          deb http://old-releases.ubuntu.com/ubuntu/ cosmic-security main restricted universe multiverse
-          deb http://old-releases.ubuntu.com/ubuntu/ cosmic-backports main restricted universe multiverse
-          EOF
-          
-          # Also update sources.list.d if any files exist
-          if [ -d /etc/apt/sources.list.d ]; then
-            for file in /etc/apt/sources.list.d/*.list; do
-              [ -f "$file" ] && sed -i 's|http://archive.ubuntu.com/ubuntu|http://old-releases.ubuntu.com/ubuntu|g' "$file"
-            done
-          fi
+          sed -i 's|http://archive.ubuntu.com/ubuntu|http://old-releases.ubuntu.com/ubuntu|g' /etc/apt/sources.list
+          sed -i 's|http://security.ubuntu.com/ubuntu|http://old-releases.ubuntu.com/ubuntu|g' /etc/apt/sources.list
       - name: Build or download OCP Source
         id: build-ocp-source
         uses: ./.github/actions/build-ocp-source
@@ -229,23 +209,8 @@ jobs:
       - name: Fix Ubuntu 18.10 apt sources
         shell: bash -l {0}
         run: |
-          # Backup original sources.list
-          cp /etc/apt/sources.list /etc/apt/sources.list.backup
-          
-          # Create new sources.list for Ubuntu 18.10 (Cosmic) archive
-          cat > /etc/apt/sources.list << 'EOF'
-          deb http://old-releases.ubuntu.com/ubuntu/ cosmic main restricted universe multiverse
-          deb http://old-releases.ubuntu.com/ubuntu/ cosmic-updates main restricted universe multiverse
-          deb http://old-releases.ubuntu.com/ubuntu/ cosmic-security main restricted universe multiverse
-          deb http://old-releases.ubuntu.com/ubuntu/ cosmic-backports main restricted universe multiverse
-          EOF
-          
-          # Also update sources.list.d if any files exist
-          if [ -d /etc/apt/sources.list.d ]; then
-            for file in /etc/apt/sources.list.d/*.list; do
-              [ -f "$file" ] && sed -i 's|http://archive.ubuntu.com/ubuntu|http://old-releases.ubuntu.com/ubuntu|g' "$file"
-            done
-          fi
+          sed -i 's|http://archive.ubuntu.com/ubuntu|http://old-releases.ubuntu.com/ubuntu|g' /etc/apt/sources.list
+          sed -i 's|http://security.ubuntu.com/ubuntu|http://old-releases.ubuntu.com/ubuntu|g' /etc/apt/sources.list
       - name: Build OCP
         id: build-ocp
         uses: ./.github/actions/build-ocp
