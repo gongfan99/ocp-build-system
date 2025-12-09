@@ -56,6 +56,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Fix Ubuntu 18.10 apt sources
+        shell: bash -l {0}
+        run: |
+          sed -i 's|http://archive.ubuntu.com/ubuntu|http://old-releases.ubuntu.com/ubuntu|g' /etc/apt/sources.list
+          sed -i 's|http://security.ubuntu.com/ubuntu|http://old-releases.ubuntu.com/ubuntu|g' /etc/apt/sources.list
+
       - name: Build SDKs
         id: build-sdks
         uses: ./.github/actions/build-sdks
@@ -91,6 +97,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Fix Ubuntu 18.10 apt sources
+        shell: bash -l {0}
+        run: |
+          sed -i 's|http://archive.ubuntu.com/ubuntu|http://old-releases.ubuntu.com/ubuntu|g' /etc/apt/sources.list
+          sed -i 's|http://security.ubuntu.com/ubuntu|http://old-releases.ubuntu.com/ubuntu|g' /etc/apt/sources.list
       - name: Build or download OCP Source
         id: build-ocp-source
         uses: ./.github/actions/build-ocp-source
@@ -185,6 +196,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Fix Ubuntu 18.10 apt sources
+        shell: bash -l {0}
+        run: |
+          sed -i 's|http://archive.ubuntu.com/ubuntu|http://old-releases.ubuntu.com/ubuntu|g' /etc/apt/sources.list
+          sed -i 's|http://security.ubuntu.com/ubuntu|http://old-releases.ubuntu.com/ubuntu|g' /etc/apt/sources.list
       - name: Build OCP
         id: build-ocp
         uses: ./.github/actions/build-ocp
