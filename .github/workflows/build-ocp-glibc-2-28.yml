@@ -71,6 +71,67 @@ jobs:
             echo -n "$pkg: "
             apt-cache policy $pkg | grep -E "Candidate:|http://old-releases" || echo "NOT FOUND"
           done
+          
+          echo ""
+          echo "Searching for alternative package names:"
+          echo "Searching for freetype packages:"
+          apt-cache search freetype | grep -i dev || echo "No freetype dev packages found"
+          echo ""
+          echo "Searching for fontconfig packages:"
+          apt-cache search fontconfig | grep -i dev || echo "No fontconfig dev packages found"
+          
+          echo ""
+          echo "Trying to install missing packages with alternatives:"
+          # Try to install libfreetype6-dev instead of libfreetype-dev
+          if ! apt-cache policy libfreetype6-dev | grep -q "Candidate:"; then
+            echo "libfreetype6-dev not available either"
+          else
+            echo "libfreetype6-dev is available"
+          fi
+          
+          # Try to install libfontconfig1-dev instead of libfontconfig-dev
+          if ! apt-cache policy libfontconfig1-dev | grep -q "Candidate:"; then
+            echo "libfontconfig1-dev not available either"
+          else
+            echo "libfontconfig1-dev is available"
+          fi
+
+      - name: Install missing packages with alternative names
+        shell: bash -l {0}
+        run: |
+          # Try to install alternative packages that might be available
+          apt-get update -qq
+          
+          # Check what's actually available and install if possible
+          if apt-cache policy libfreetype6-dev | grep -q "Candidate:"; then
+            echo "Installing libfreetype6-dev as alternative to libfreetype-dev"
+            DEBIAN_FRONTEND=noninteractive apt-get install -qq -y libfreetype6-dev
+          else
+            echo "libfreetype6-dev not available, trying to find any freetype dev package"
+            # Try to find any freetype development package
+            FREETYPE_PKG=$(apt-cache search freetype | grep -i dev | head -1 | cut -d' ' -f1)
+            if [ -n "$FREETYPE_PKG" ]; then
+              echo "Installing $FREETYPE_PKG as alternative to libfreetype-dev"
+              DEBIAN_FRONTEND=noninteractive apt-get install -qq -y $FREETYPE_PKG
+            else
+              echo "No freetype development package found"
+            fi
+          fi
+          
+          if apt-cache policy libfontconfig1-dev | grep -q "Candidate:"; then
+            echo "Installing libfontconfig1-dev as alternative to libfontconfig-dev"
+            DEBIAN_FRONTEND=noninteractive apt-get install -qq -y libfontconfig1-dev
+          else
+            echo "libfontconfig1-dev not available, trying to find any fontconfig dev package"
+            # Try to find any fontconfig development package
+            FONTCONFIG_PKG=$(apt-cache search fontconfig | grep -i dev | head -1 | cut -d' ' -f1)
+            if [ -n "$FONTCONFIG_PKG" ]; then
+              echo "Installing $FONTCONFIG_PKG as alternative to libfontconfig-dev"
+              DEBIAN_FRONTEND=noninteractive apt-get install -qq -y $FONTCONFIG_PKG
+            else
+              echo "No fontconfig development package found"
+            fi
+          fi
 
       - name: Build SDKs
         id: build-sdks
