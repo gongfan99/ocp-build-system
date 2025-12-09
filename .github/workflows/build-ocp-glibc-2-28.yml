@@ -27,7 +27,7 @@ jobs:
     name: Build OCCT SDK for ${{ matrix.python-version }} on ${{ matrix.os }} (${{ matrix.use-vtk }})
     runs-on: ${{ matrix.runner }}
     container:
-      image: debian:10
+      image: ubuntu:18.10
       options: --name ci-ubuntu-20 # needed for manylinux_2_31
 
     strategy:
@@ -80,7 +80,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     container:
-      image: debian:10
+      image: ubuntu:18.10
       options: --name ci-ubuntu-20 # needed for manylinux_3_31
 
     strategy:
@@ -153,7 +153,7 @@ jobs:
     name: Build OCP for ${{ matrix.python-version }} on ${{ matrix.os }} (${{ matrix.use-vtk }})
     runs-on: ${{ matrix.runner }}
     container:
-      image: debian:10
+      image: ubuntu:18.10
       options: --name ci-ubuntu-20 # needed for manylinux_2_31
     needs: [sdks-ubuntu, sources-ubuntu, ocp-proxy]
 
