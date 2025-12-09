@@ -27,7 +27,7 @@ jobs:
     name: Build OCCT SDK for ${{ matrix.python-version }} on ${{ matrix.os }} (${{ matrix.use-vtk }})
     runs-on: ${{ matrix.runner }}
     container:
-      image: ubuntu:18.04
+      image: debian:10
       options: --name ci-ubuntu-20 # needed for manylinux_2_31
 
     strategy:
@@ -54,7 +54,7 @@ jobs:
           #   runner: ubuntu-24.04-arm
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Build SDKs
         id: build-sdks
@@ -68,56 +68,6 @@ jobs:
           vtk-prefix: ""
           shells: "bash"
 
-  # sdks-win-mac:
-  #   name: Build OCCT SDK for ${{ matrix.python-version }} on ${{ matrix.os }} (${{ matrix.use-vtk }})
-  #   runs-on: ${{ matrix.os }}
-
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       os: ["macos-13", "macos-15", "windows-2022"]
-  #       python-version: [
-  #       #  "3.10", 
-  #       #  "3.11", 
-  #       #  "3.12", 
-  #         "3.13", 
-  #         "3.14"
-  #       ]
-  #       use-vtk: ["vtk", "novtk"]
-  #       exclude:
-  #         - python-version: "3.14"
-  #           use-vtk: "vtk"
-  #       include:
-  #         - os: "macos-15"
-  #           vtk-libs: ".dylibs/libvtk*.dylib"
-  #           vtk-suffix: "/"
-  #           vtk-prefix: ""
-  #           shells: "bash"
-  #         - os: "macos-13"
-  #           vtk-libs: ".dylibs/libvtk*.dylib"
-  #           vtk-suffix: "/"
-  #           vtk-prefix: ""
-  #           shells: "bash"
-  #         - os: "windows-2022"
-  #           vtk-libs: "vtk*.dll"
-  #           vtk-suffix: "/"
-  #           vtk-prefix: "Library/"
-  #           shells: "bash cmd.exe"
-
-  #   steps:
-  #     - uses: actions/checkout@v3
-
-  #     - name: Build SDKs
-  #       id: build-sdks
-  #       uses: ./.github/actions/build-sdks
-  #       with:
-  #         os: ${{ matrix.os }}
-  #         python-version: ${{ matrix.python-version }}
-  #         use-vtk: ${{ matrix.use-vtk }}
-  #         vtk-libs: ${{ matrix.vtk-libs }}
-  #         vtk-suffix: ${{ matrix.vtk-suffix }}
-  #         vtk-prefix: ${{ matrix.vtk-prefix }}
-  #         shells: ${{ matrix.shells }}
 
   # ================================================================================
   # Generate OCP sources
@@ -130,7 +80,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     container:
-      image: ubuntu:18.04
+      image: debian:10
       options: --name ci-ubuntu-20 # needed for manylinux_3_31
 
     strategy:
@@ -140,7 +90,7 @@ jobs:
         python-version: ["3.13"]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Build or download OCP Source
         id: build-ocp-source
         uses: ./.github/actions/build-ocp-source
@@ -148,24 +98,6 @@ jobs:
           os: ${{ matrix.os }}
           python-version: ${{ matrix.python-version }}
 
-  # sources-win-mac:
-  #   name: Build OCP source on ${{ matrix.os }}
-  #   runs-on: ${{ matrix.os }}
-
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       os: ["macos-15", "windows-2022"]
-  #       python-version: ["3.13"]
-
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: Build or download OCP Source
-  #       id: build-ocp-source
-  #       uses: ./.github/actions/build-ocp-source
-  #       with:
-  #         os: ${{ matrix.os }}
-  #         python-version: ${{ matrix.python-version }}
 
   # ================================================================================
   # Build OCP proxy
@@ -187,7 +119,7 @@ jobs:
         ]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
@@ -208,7 +140,7 @@ jobs:
           uv build
 
       - name: Upload cadquery_ocp_proxy wheel
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: cadquery-ocp-proxy-${{ env.WHEEL }}-cp-${{ matrix.python-version }}
           path: cadquery_ocp_proxy/dist/*.whl
@@ -221,7 +153,7 @@ jobs:
     name: Build OCP for ${{ matrix.python-version }} on ${{ matrix.os }} (${{ matrix.use-vtk }})
     runs-on: ${{ matrix.runner }}
     container:
-      image: ubuntu:18.04
+      image: debian:10
       options: --name ci-ubuntu-20 # needed for manylinux_2_31
     needs: [sdks-ubuntu, sources-ubuntu, ocp-proxy]
 
@@ -252,7 +184,7 @@ jobs:
           #   plat: manylinux_2_31_aarch64
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Build OCP
         id: build-ocp
         uses: ./.github/actions/build-ocp
@@ -267,61 +199,6 @@ jobs:
           env: "DUMMY=0"
           ocp-source-tag: "ubuntu-22.04"
 
-  # ocp-win-mac:
-  #   name: Build OCP for ${{ matrix.python-version }} on ${{ matrix.os }} (${{ matrix.use-vtk }})
-  #   runs-on: ${{ matrix.os }}
-  #   needs: [sdks-win-mac, sources-win-mac, ocp-proxy]
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       os: ["macos-13", "macos-15", "windows-2022"]
-  #       python-version: [
-  #       #  "3.10", 
-  #       #  "3.11", 
-  #       #  "3.12", 
-  #         "3.13", 
-  #         "3.14"
-  #       ]
-  #       use-vtk: ["vtk", "novtk"]
-  #       exclude:
-  #         - python-version: "3.14"
-  #           use-vtk: "vtk"
-  #       include:
-  #         - os: "macos-15"
-  #           delocate: delocate
-  #           plat: macosx_11_1_arm64
-  #           module: "OCP.*.so"
-  #           env: "MACOSX_DEPLOYMENT_TARGET=11.1"
-  #           shells: "bash"
-  #           ocp-source-tag: "macos-15"
-  #         - os: "macos-13"
-  #           delocate: delocate
-  #           plat: macosx_11_1_x86_64
-  #           module: "OCP.*.so"
-  #           env: "MACOSX_DEPLOYMENT_TARGET=11.1"
-  #           shells: "bash"
-  #           ocp-source-tag: "macos-15"
-  #         - os: "windows-2022"
-  #           delocate: delvewheel
-  #           plat: win_amd64
-  #           shells: "bash cmd.exe"
-  #           module: "OCP.*.pyd"
-  #           ocp-source-tag: "windows-2022"
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: Build OCP
-  #       id: build-ocp
-  #       uses: ./.github/actions/build-ocp
-  #       with:
-  #         os: ${{ matrix.os }}
-  #         python-version: ${{ matrix.python-version }}
-  #         use-vtk: ${{ matrix.use-vtk }}
-  #         shells: ${{ matrix.shells }}
-  #         delocate: ${{ matrix.delocate }}
-  #         plat: ${{ matrix.plat }}
-  #         module: ${{ matrix.module }}
-  #         env: ${{ matrix.env }}
-  #         ocp-source-tag: ${{ matrix.ocp-source-tag }}
 
   # ================================================================================
   # Tests
@@ -369,7 +246,7 @@ jobs:
           #   runner: windows-2022
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Test OCP
         id: test-ocp
         uses: ./.github/actions/test-ocp
@@ -388,12 +265,12 @@ jobs:
     needs: [tests]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         if: env.RELEASE_TO_REPO == 'true'
 
       - name: Download all wheel artifacts
         if: env.RELEASE_TO_REPO == 'true'
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: wheels
           pattern: cadquery-*
