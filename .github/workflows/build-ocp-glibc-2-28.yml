@@ -59,8 +59,23 @@ jobs:
       - name: Fix Ubuntu 18.10 apt sources
         shell: bash -l {0}
         run: |
-          sed -i 's|http://archive.ubuntu.com/ubuntu|http://old-releases.ubuntu.com/ubuntu|g' /etc/apt/sources.list
-          sed -i 's|http://security.ubuntu.com/ubuntu|http://old-releases.ubuntu.com/ubuntu|g' /etc/apt/sources.list
+          # Backup original sources.list
+          cp /etc/apt/sources.list /etc/apt/sources.list.backup
+          
+          # Create new sources.list for Ubuntu 18.10 (Cosmic) archive
+          cat > /etc/apt/sources.list << 'EOF'
+          deb http://old-releases.ubuntu.com/ubuntu/ cosmic main restricted universe multiverse
+          deb http://old-releases.ubuntu.com/ubuntu/ cosmic-updates main restricted universe multiverse
+          deb http://old-releases.ubuntu.com/ubuntu/ cosmic-security main restricted universe multiverse
+          deb http://old-releases.ubuntu.com/ubuntu/ cosmic-backports main restricted universe multiverse
+          EOF
+          
+          # Also update sources.list.d if any files exist
+          if [ -d /etc/apt/sources.list.d ]; then
+            for file in /etc/apt/sources.list.d/*.list; do
+              [ -f "$file" ] && sed -i 's|http://archive.ubuntu.com/ubuntu|http://old-releases.ubuntu.com/ubuntu|g' "$file"
+            done
+          fi
 
       - name: Build SDKs
         id: build-sdks
@@ -100,8 +115,23 @@ jobs:
       - name: Fix Ubuntu 18.10 apt sources
         shell: bash -l {0}
         run: |
-          sed -i 's|http://archive.ubuntu.com/ubuntu|http://old-releases.ubuntu.com/ubuntu|g' /etc/apt/sources.list
-          sed -i 's|http://security.ubuntu.com/ubuntu|http://old-releases.ubuntu.com/ubuntu|g' /etc/apt/sources.list
+          # Backup original sources.list
+          cp /etc/apt/sources.list /etc/apt/sources.list.backup
+          
+          # Create new sources.list for Ubuntu 18.10 (Cosmic) archive
+          cat > /etc/apt/sources.list << 'EOF'
+          deb http://old-releases.ubuntu.com/ubuntu/ cosmic main restricted universe multiverse
+          deb http://old-releases.ubuntu.com/ubuntu/ cosmic-updates main restricted universe multiverse
+          deb http://old-releases.ubuntu.com/ubuntu/ cosmic-security main restricted universe multiverse
+          deb http://old-releases.ubuntu.com/ubuntu/ cosmic-backports main restricted universe multiverse
+          EOF
+          
+          # Also update sources.list.d if any files exist
+          if [ -d /etc/apt/sources.list.d ]; then
+            for file in /etc/apt/sources.list.d/*.list; do
+              [ -f "$file" ] && sed -i 's|http://archive.ubuntu.com/ubuntu|http://old-releases.ubuntu.com/ubuntu|g' "$file"
+            done
+          fi
       - name: Build or download OCP Source
         id: build-ocp-source
         uses: ./.github/actions/build-ocp-source
@@ -199,8 +229,23 @@ jobs:
       - name: Fix Ubuntu 18.10 apt sources
         shell: bash -l {0}
         run: |
-          sed -i 's|http://archive.ubuntu.com/ubuntu|http://old-releases.ubuntu.com/ubuntu|g' /etc/apt/sources.list
-          sed -i 's|http://security.ubuntu.com/ubuntu|http://old-releases.ubuntu.com/ubuntu|g' /etc/apt/sources.list
+          # Backup original sources.list
+          cp /etc/apt/sources.list /etc/apt/sources.list.backup
+          
+          # Create new sources.list for Ubuntu 18.10 (Cosmic) archive
+          cat > /etc/apt/sources.list << 'EOF'
+          deb http://old-releases.ubuntu.com/ubuntu/ cosmic main restricted universe multiverse
+          deb http://old-releases.ubuntu.com/ubuntu/ cosmic-updates main restricted universe multiverse
+          deb http://old-releases.ubuntu.com/ubuntu/ cosmic-security main restricted universe multiverse
+          deb http://old-releases.ubuntu.com/ubuntu/ cosmic-backports main restricted universe multiverse
+          EOF
+          
+          # Also update sources.list.d if any files exist
+          if [ -d /etc/apt/sources.list.d ]; then
+            for file in /etc/apt/sources.list.d/*.list; do
+              [ -f "$file" ] && sed -i 's|http://archive.ubuntu.com/ubuntu|http://old-releases.ubuntu.com/ubuntu|g' "$file"
+            done
+          fi
       - name: Build OCP
         id: build-ocp
         uses: ./.github/actions/build-ocp
