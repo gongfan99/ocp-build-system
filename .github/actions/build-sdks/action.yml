@@ -27,7 +27,7 @@ runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v4
- 
+
     # - - -
 
     - name: Restore VTK SDK cache
@@ -60,8 +60,8 @@ runs:
         apt-get update -qq
         DEBIAN_FRONTEND=noninteractive apt-get install -qq -y \
           mesa-common-dev libegl1-mesa-dev libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev libxcursor-dev \
-          libfreeimage-dev libfreetype-dev libfontconfig-dev git patch clang build-essential ca-certificates   > /dev/null 2>&1
-          
+          libfreeimage-dev libfreetype6-dev libfontconfig1-dev git patch clang build-essential ca-certificates   > /dev/null 2>&1
+
     # - - - (micromamba needs ca-certificates for ubuntu)
 
     - name: (All) Patch environment.yml for Python
